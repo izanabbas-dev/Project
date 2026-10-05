@@ -1,6 +1,8 @@
 import React from 'react'
 import { useContext } from 'react'
 import { AuthContext } from '../contexts/AuthContext'
+import { Link } from "react-router-dom"
+import Layout from '../components/Layout'
 
 function Home() {
   const { user, logout } = useContext(AuthContext)
@@ -9,17 +11,15 @@ function Home() {
   const handleLogout = async (e) => {
     e.preventDefault()
     await logout()
-    window.alert("Logout Successfully")
-  } 
-  return (
-    <div>
-        Home
+    window.alert("Logout successfully")
+  }
 
-        <form onSubmit={handleLogout}>
-            <button className='btn bg-red-500 text-white hover:bg-red-600' type='submit'>click to logout</button>
-        </form>
-    </div>
-)
+
+  return (
+    <Layout>
+      Home
+    </Layout>
+  )
 }
 
 export default Home

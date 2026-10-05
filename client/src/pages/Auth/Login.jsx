@@ -1,36 +1,69 @@
-import React, { useState } from 'react';
-import { useContext } from 'react';
-import { AuthContext } from '../../contexts/AuthContext';
+import { useContext } from "react";
+import { useState } from "react";
+import { AuthContext } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
-const Login = () => {
-  const { login, user } = useContext(AuthContext)
+export default function Login() {
 
+  const { login, user } = useContext(AuthContext) 
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
 
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(formData.email))
+      newErrors.email = "Email is invalid";
+    if (!formData.password) newErrors.password = "Password is required";
+    return newErrors;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login Form Submitted:', formData); 
-    console.log(user)
-    // Add API integration here
+    const newErrors = validate();
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
+    setLoading(true);
+    try {
+      await login(formData)
+      alert("Login successful!");
+      console.log(user)
+      navigate('/')
+    } catch (err) {
+      setErrors({ form: err.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
-//   console.log(formData)
 
   return (
-    <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-      <div className="card w-full max-w-md bg-base-100 shadow-xl">
+    <div className="min-h-screen flex items-center justify-center bg-base-200 px-4">
+      <div className="card w-full max-w-sm bg-base-100 shadow-xl">
         <div className="card-body">
-          <h2 className="card-title text-2xl font-bold justify-center mb-4">Login</h2>
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
+          <h2 className="card-title text-2xl justify-center mb-2">
+            Welcome Back
+          </h2>
+
+          {errors.form && (
+            <div className="alert alert-error text-sm py-2">
+              <span>{errors.form}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Email</span>
@@ -38,15 +71,18 @@ const Login = () => {
               <input
                 type="email"
                 name="email"
-                placeholder="Enter your email"
-                className="input input-bordered w-full"
                 value={formData.email}
                 onChange={handleChange}
-                required
+                placeholder="you@example.com"
+                className={`input input-bordered w-full ${
+                  errors.email ? "input-error" : ""
+                }`}
               />
+              {errors.email && (
+                <span className="text-error text-xs mt-1">{errors.email}</span>
+              )}
             </div>
 
-            {/* Password */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Password</span>
@@ -54,30 +90,48 @@ const Login = () => {
               <input
                 type="password"
                 name="password"
-                placeholder="Enter your password"
-                className="input input-bordered w-full"
                 value={formData.password}
                 onChange={handleChange}
-                required
+                placeholder="••••••••"
+                className={`input input-bordered w-full ${
+                  errors.password ? "input-error" : ""
+                }`}
               />
+              {errors.password && (
+                <span className="text-error text-xs mt-1">
+                  {errors.password}
+                </span>
+              )}
               <label className="label">
-                <a href="#forgot-password" className="label-text-alt link link-hover">
+                <a href="/forgot-password" className="label-text-alt link link-hover">
                   Forgot password?
                 </a>
               </label>
             </div>
 
-            {/* Submit Button */}
-            <div className="form-control mt-6">
-              <button type="submit" className="btn btn-primary w-full">
-                Login
+            <div className="form-control mt-4">
+              <button
+                type="submit"
+                className="btn btn-primary w-full"
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="loading loading-spinner"></span>
+                ) : (
+                  "Login"
+                )}
               </button>
             </div>
+
+            <p className="text-center text-sm mt-2">
+              Don't have an account?{" "}
+              <a href="/register" className="link link-primary">
+                Register
+              </a>
+            </p>
           </form>
         </div>
       </div>
     </div>
   );
-};
-
-export default Login;
+}

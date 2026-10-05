@@ -1,36 +1,78 @@
-import React, { useState } from 'react';
+import { useContext, useState } from "react";
+import { AuthContext } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
-const Register = () => {
+export default function Register() {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    address: '',
-    workphone_no: '',
-    cellphone_no: '',
-    dob: ''
+    name: "",
+    email: "",
+    password: "",
+    address: "",
+    workphone_no: "",
+    cellphone_no: "",
+    dob: "",
   });
 
+  const navigate = useNavigate()
+  const { register } = useContext(AuthContext)
+
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.value || e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(formData.email))
+      newErrors.email = "Email is invalid";
+    if (!formData.password) newErrors.password = "Password is required";
+    else if (formData.password.length < 6)
+      newErrors.password = "Password must be at least 6 characters";
+    if (!formData.address.trim()) newErrors.address = "Address is required";
+    if (!formData.cellphone_no.trim())
+      newErrors.cellphone_no = "Cellphone number is required";
+    if (!formData.dob) newErrors.dob = "Date of birth is required";
+    return newErrors;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Register Form Submitted:', formData);
-    // Add API integration here
-  };
+    const newErrors = validate();
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
 
-//   console.log(formData)
+    setLoading(true);
+    try {
+      await register(formData)
+      alert("Registration successful!");
+      navigate('/login')
+    } catch (err) {
+      setErrors({ form: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center bg-base-200 px-4 py-10">
       <div className="card w-full max-w-lg bg-base-100 shadow-xl">
         <div className="card-body">
-          <h2 className="card-title text-2xl font-bold justify-center mb-4">Create an Account</h2>
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name */}
+          <h2 className="card-title text-2xl justify-center mb-2">
+            Create an Account
+          </h2>
+
+          {errors.form && (
+            <div className="alert alert-error text-sm py-2">
+              <span>{errors.form}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Full Name</span>
@@ -38,15 +80,18 @@ const Register = () => {
               <input
                 type="text"
                 name="name"
-                placeholder="Enter your name"
-                className="input input-bordered w-full"
                 value={formData.name}
                 onChange={handleChange}
-                required
+                placeholder="John Doe"
+                className={`input input-bordered w-full ${
+                  errors.name ? "input-error" : ""
+                }`}
               />
+              {errors.name && (
+                <span className="text-error text-xs mt-1">{errors.name}</span>
+              )}
             </div>
 
-            {/* Email */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Email</span>
@@ -54,15 +99,18 @@ const Register = () => {
               <input
                 type="email"
                 name="email"
-                placeholder="Enter your email"
-                className="input input-bordered w-full"
                 value={formData.email}
                 onChange={handleChange}
-                required
+                placeholder="you@example.com"
+                className={`input input-bordered w-full ${
+                  errors.email ? "input-error" : ""
+                }`}
               />
+              {errors.email && (
+                <span className="text-error text-xs mt-1">{errors.email}</span>
+              )}
             </div>
 
-            {/* Password */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Password</span>
@@ -70,15 +118,20 @@ const Register = () => {
               <input
                 type="password"
                 name="password"
-                placeholder="Enter your password"
-                className="input input-bordered w-full"
                 value={formData.password}
                 onChange={handleChange}
-                required
+                placeholder="••••••••"
+                className={`input input-bordered w-full ${
+                  errors.password ? "input-error" : ""
+                }`}
               />
+              {errors.password && (
+                <span className="text-error text-xs mt-1">
+                  {errors.password}
+                </span>
+              )}
             </div>
 
-            {/* Address */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Address</span>
@@ -86,17 +139,21 @@ const Register = () => {
               <input
                 type="text"
                 name="address"
-                placeholder="Enter your address"
-                className="input input-bordered w-full"
                 value={formData.address}
                 onChange={handleChange}
-                required
+                placeholder="Street, Area, City"
+                className={`input input-bordered w-full ${
+                  errors.address ? "input-error" : ""
+                }`}
               />
+              {errors.address && (
+                <span className="text-error text-xs mt-1">
+                  {errors.address}
+                </span>
+              )}
             </div>
 
-            {/* Grid for Phones */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Work Phone */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Work Phone No.</span>
@@ -104,31 +161,35 @@ const Register = () => {
                 <input
                   type="tel"
                   name="workphone_no"
-                  placeholder="02112345644"
-                  className="input input-bordered w-full"
                   value={formData.workphone_no}
                   onChange={handleChange}
+                  placeholder="021-12345644"
+                  className="input input-bordered w-full"
                 />
               </div>
 
-              {/* Cell Phone */}
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Cell Phone No.</span>
+                  <span className="label-text">Cellphone No.</span>
                 </label>
                 <input
                   type="tel"
                   name="cellphone_no"
-                  placeholder="031412345644"
-                  className="input input-bordered w-full"
                   value={formData.cellphone_no}
                   onChange={handleChange}
-                  required
+                  placeholder="0314-12345644"
+                  className={`input input-bordered w-full ${
+                    errors.cellphone_no ? "input-error" : ""
+                  }`}
                 />
+                {errors.cellphone_no && (
+                  <span className="text-error text-xs mt-1">
+                    {errors.cellphone_no}
+                  </span>
+                )}
               </div>
             </div>
 
-            {/* Date of Birth */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Date of Birth</span>
@@ -136,24 +197,40 @@ const Register = () => {
               <input
                 type="date"
                 name="dob"
-                className="input input-bordered w-full"
                 value={formData.dob}
                 onChange={handleChange}
-                required
+                className={`input input-bordered w-full ${
+                  errors.dob ? "input-error" : ""
+                }`}
               />
+              {errors.dob && (
+                <span className="text-error text-xs mt-1">{errors.dob}</span>
+              )}
             </div>
 
-            {/* Submit Button */}
             <div className="form-control mt-6">
-              <button type="submit" className="btn btn-primary w-full">
-                Register
+              <button
+                type="submit"
+                className="btn btn-primary w-full"
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="loading loading-spinner"></span>
+                ) : (
+                  "Register"
+                )}
               </button>
             </div>
+
+            <p className="text-center text-sm mt-2">
+              Already have an account?{" "}
+              <a href="/login" className="link link-primary">
+                Login
+              </a>
+            </p>
           </form>
         </div>
       </div>
     </div>
   );
-};
-
-export default Register;
+}
