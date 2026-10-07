@@ -1,31 +1,41 @@
-import { useContext } from "react";
 import { useState } from "react";
-import { AuthContext } from "../../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { Mail, Lock, LogIn, AlertCircle, Eye, EyeOff, ArrowRight } from "lucide-react";
+import Layout from "../../components/Layout";
 
 export default function Login() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const { login, user } = useContext(AuthContext) 
-  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.email.trim()) newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(formData.email))
-      newErrors.email = "Email is invalid";
-    if (!formData.password) newErrors.password = "Password is required";
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    }
     return newErrors;
   };
 
@@ -37,10 +47,9 @@ export default function Login() {
 
     setLoading(true);
     try {
-      await login(formData)
-      alert("Login successful!");
-      console.log(user)
-      navigate('/')
+      await login(formData);
+      const destination = location.state?.from?.pathname || "/";
+      navigate(destination, { replace: true });
     } catch (err) {
       setErrors({ form: err.message });
     } finally {
@@ -48,90 +57,130 @@ export default function Login() {
     }
   };
 
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-base-200 px-4">
-      <div className="card w-full max-w-sm bg-base-100 shadow-xl">
-        <div className="card-body">
-          <h2 className="card-title text-2xl justify-center mb-2">
-            Welcome Back
-          </h2>
-
-          {errors.form && (
-            <div className="alert alert-error text-sm py-2">
-              <span>{errors.form}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Email</span>
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                className={`input input-bordered w-full ${
-                  errors.email ? "input-error" : ""
-                }`}
-              />
-              {errors.email && (
-                <span className="text-error text-xs mt-1">{errors.email}</span>
-              )}
+    <>
+      <div className="min-h-[70vh] flex items-center justify-center py-6">
+        <div className="card w-full max-w-md bg-base-100 border border-base-300 shadow-sm rounded-xl">
+          <div className="card-body p-6 sm:p-8">
+            <div className="text-center mb-4">
+              <div className="inline-flex p-3 rounded-full bg-primary/10 text-primary mb-3">
+                <LogIn className="w-6 h-6" />
+              </div>
+              <h1 className="text-2xl font-bold text-base-content">
+                Welcome Back
+              </h1>
+              <p className="text-sm text-base-content/60 mt-1">
+                Enter your credentials to access your account
+              </p>
             </div>
 
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Password</span>
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                className={`input input-bordered w-full ${
-                  errors.password ? "input-error" : ""
-                }`}
-              />
-              {errors.password && (
-                <span className="text-error text-xs mt-1">
-                  {errors.password}
-                </span>
-              )}
-              <label className="label">
-                <a href="/forgot-password" className="label-text-alt link link-hover">
-                  Forgot password?
-                </a>
-              </label>
-            </div>
+            {errors.form && (
+              <div className="alert alert-error text-sm py-3 px-4 rounded-lg flex items-center gap-2 mb-2">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <span>{errors.form}</span>
+              </div>
+            )}
 
-            <div className="form-control mt-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="form-control">
+                <label className="label pb-1">
+                  <span className="label-text font-medium text-sm">
+                    Email Address
+                  </span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/50">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="name@example.com"
+                    className={`input input-bordered w-full pl-9 ${errors.email ? "input-error" : ""
+                      }`}
+                  />
+                </div>
+                {errors.email && (
+                  <span className="text-error text-xs mt-1">
+                    {errors.email}
+                  </span>
+                )}
+              </div>
+
+              <div className="form-control">
+                <label className="label pb-1">
+                  <span className="label-text font-medium text-sm">
+                    Password
+                  </span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/50">
+                    <Lock className="w-4 h-4" />
+                  </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    className={`input input-bordered w-full pl-9 pr-10 ${errors.password ? "input-error" : ""
+                      }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/50 hover:text-base-content"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+                {errors.password && (
+                  <span className="text-error text-xs mt-1">
+                    {errors.password}
+                  </span>
+                )}
+              </div>
+
               <button
                 type="submit"
-                className="btn btn-primary w-full"
+                className="btn btn-primary w-full mt-2"
                 disabled={loading}
               >
                 {loading ? (
-                  <span className="loading loading-spinner"></span>
+                  <>
+                    <span className="loading loading-spinner loading-sm"></span>
+                    <span>Signing in...</span>
+                  </>
                 ) : (
-                  "Login"
+                  <>
+                    <LogIn className="w-4 h-4" />
+                    <span>Sign In</span>
+                  </>
                 )}
               </button>
-            </div>
+            </form>
 
-            <p className="text-center text-sm mt-2">
-              Don't have an account?{" "}
-              <a href="/register" className="link link-primary">
-                Register
-              </a>
+            <div className="divider my-4"></div>
+
+            <p className="text-center text-sm text-base-content/70">
+              Don't have an account yet?{" "}
+              <Link
+                to="/register"
+                className="link link-primary font-medium inline-flex items-center gap-1"
+              >
+                Create Account <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </p>
-          </form>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
