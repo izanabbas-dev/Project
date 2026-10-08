@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, NavLink, useNavigate, useLocation, Outlet } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import ThemeToggle from "./ThemeToggle";
 import {
   LayoutDashboard,
   Package,
@@ -74,19 +75,20 @@ export default function AdminLayout({ children }) {
   };
 
   return (
-    <div className="min-h-screen flex bg-base-200/60 text-base-content">
+    <div className="min-h-screen flex bg-base-200/50 text-base-content transition-colors duration-200">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 backdrop-blur-xs z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 bottom-0 z-50 w-64 bg-base-100 border-r border-base-300 flex flex-col transition-transform duration-200 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`fixed top-0 left-0 bottom-0 z-50 w-64 bg-base-100 border-r border-base-300 flex flex-col transition-transform duration-200 lg:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         {/* Sidebar Brand Header */}
         <div className="h-16 px-6 flex items-center justify-between border-b border-base-200">
@@ -94,11 +96,11 @@ export default function AdminLayout({ children }) {
             to="/admin"
             className="flex items-center gap-2.5 font-bold text-lg text-base-content"
           >
-            <div className="p-2 rounded-lg bg-primary text-primary-content">
+            <div className="p-2 rounded-lg bg-primary text-primary-content shadow-xs">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div className="flex flex-col">
-              <span className="leading-tight">Admin Portal</span>
+              <span className="leading-tight font-extrabold">Admin Portal</span>
               <span className="text-[10px] font-medium text-base-content/50 uppercase tracking-wider">
                 Control Center
               </span>
@@ -125,10 +127,11 @@ export default function AdminLayout({ children }) {
                 key={item.path}
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${active
-                    ? "bg-primary text-primary-content shadow-sm"
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  active
+                    ? "bg-primary text-primary-content shadow-xs"
                     : "text-base-content/80 hover:bg-base-200 hover:text-base-content"
-                  }`}
+                }`}
               >
                 <Icon className="w-4 h-4 flex-shrink-0" />
                 <span>{item.name}</span>
@@ -141,7 +144,7 @@ export default function AdminLayout({ children }) {
         <div className="p-3 border-t border-base-200 space-y-2">
           <Link
             to="/"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors"
           >
             <Store className="w-4 h-4 text-primary" />
             <span>View Public Store</span>
@@ -149,11 +152,11 @@ export default function AdminLayout({ children }) {
 
           <div className="p-2.5 rounded-xl bg-base-200/80 border border-base-300 flex items-center justify-between">
             <div className="flex items-center gap-2.5 overflow-hidden">
-              <div className="w-8 h-8 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-bold text-xs uppercase flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-xs uppercase flex-shrink-0 border border-primary/30">
                 {user?.name ? user.name.charAt(0) : "A"}
               </div>
               <div className="overflow-hidden">
-                <p className="text-xs font-semibold capitalize truncate">
+                <p className="text-xs font-semibold capitalize truncate text-base-content">
                   {user?.name || "Admin"}
                 </p>
                 <p className="text-[10px] text-base-content/60 truncate">
@@ -175,7 +178,7 @@ export default function AdminLayout({ children }) {
       {/* Main Content Wrapper */}
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
         {/* Top Navbar */}
-        <header className="sticky top-0 z-30 h-16 bg-base-100 border-b border-base-300 px-4 sm:px-6 flex items-center justify-between">
+        <header className="sticky top-0 z-30 h-16 bg-base-100 border-b border-base-300 px-4 sm:px-6 flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -195,6 +198,9 @@ export default function AdminLayout({ children }) {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Theme Toggle Button */}
+            <ThemeToggle />
+
             <Link
               to="/"
               className="btn btn-outline btn-sm hidden sm:flex items-center gap-1.5"
@@ -209,13 +215,13 @@ export default function AdminLayout({ children }) {
                 role="button"
                 className="btn btn-ghost btn-sm btn-circle avatar placeholder"
               >
-                <div className="bg-neutral text-neutral-content rounded-full w-8 text-xs font-bold uppercase">
+                <div className="bg-primary/20 text-primary border border-primary/30 rounded-full w-8 text-xs font-bold uppercase">
                   <span>{user?.name ? user.name.charAt(0) : "A"}</span>
                 </div>
               </div>
               <ul
                 tabIndex={0}
-                className="dropdown-content menu menu-sm bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow-lg border border-base-200"
+                className="dropdown-content menu menu-sm bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow-xl border border-base-300 text-base-content"
               >
                 <li className="menu-title px-3 py-1 border-b border-base-200">
                   <span className="font-semibold capitalize text-base-content">

@@ -13,26 +13,27 @@ const seeder = async () => {
 
         if(admin){
             console.log("Admin already exists in db.")
-            return
+            return 
         }
 
         const hashPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 12)
+        
         await User.create({
             name: "admin",
             email: process.env.ADMIN_EMAIL,
             password: hashPassword,
             role: "admin",
-            address: "Abc Street, XYZ Road",
-            workphone_no: "12345678931",
-            cellphone_no: "12345678931",
-            dob: "2000-01-01"
+            address: "xyz",
+            workphone_no: "2135464565",
+            cellphone_no: "2135464565",
+            dob: "2001-01-01"
         })
 
-        console.log("ADMIN CREDENTIALS seeded succesfully...")
+        console.log("ADMIN CREDENTIALS seeded successfully.....")
 
         process.exit(0)
     } catch (error) {
-        console.log("Error in seeding: ", error.message)
+        console.log("Error in seeding: ", error.message)       
     }
 }
 

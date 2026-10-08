@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useCart } from "../contexts/CartContext";
+import ThemeToggle from "./ThemeToggle";
 import {
   ShoppingBag,
   ShoppingCart,
@@ -15,10 +17,12 @@ import {
   Menu,
   X,
   Clock,
+  CheckCircle2,
 } from "lucide-react";
 
 function Navbar() {
   const { user, logout, isAdmin, isAuthenticated } = useAuth();
+  const { totalItems, toastMessage, setToastMessage } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -35,7 +39,17 @@ function Navbar() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-50 bg-base-100 border-b border-base-200">
+    <header className="sticky top-0 z-50 bg-base-100 border-b border-base-300 shadow-xs transition-colors duration-200">
+      {/* Toast Alert for Cart actions */}
+      {toastMessage && (
+        <div className="fixed top-18 right-4 z-50 animate-bounce">
+          <div className="alert alert-success shadow-lg text-white py-2 px-4 flex items-center gap-2 text-sm rounded-xl">
+            <CheckCircle2 className="w-4 h-4" />
+            <span>{toastMessage}</span>
+          </div>
+        </div>
+      )}
+
       <div className="container mx-auto px-4 navbar min-h-16 flex justify-between items-center">
         {/* Left: Brand & Mobile Toggle */}
         <div className="flex items-center gap-2">
@@ -49,12 +63,12 @@ function Navbar() {
 
           <Link
             to="/"
-            className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-neutral"
+            className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-base-content hover:opacity-90 transition-opacity"
           >
-            <div className="p-2 rounded-lg bg-primary text-primary-content">
+            <div className="p-2 rounded-lg bg-primary text-primary-content shadow-xs">
               <ShoppingBag className="w-5 h-5" />
             </div>
-            <span>E-Shop</span>
+            <span className="font-extrabold tracking-tight">E-Shop</span>
           </Link>
         </div>
 
@@ -64,7 +78,7 @@ function Navbar() {
             to="/"
             className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               isActive("/")
-                ? "bg-primary text-primary-content"
+                ? "bg-primary text-primary-content shadow-xs"
                 : "text-base-content/80 hover:bg-base-200 hover:text-base-content"
             }`}
           >
@@ -75,7 +89,7 @@ function Navbar() {
             to="/products"
             className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               isActive("/products")
-                ? "bg-primary text-primary-content"
+                ? "bg-primary text-primary-content shadow-xs"
                 : "text-base-content/80 hover:bg-base-200 hover:text-base-content"
             }`}
           >
@@ -86,7 +100,7 @@ function Navbar() {
             to="/contact"
             className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               isActive("/contact")
-                ? "bg-primary text-primary-content"
+                ? "bg-primary text-primary-content shadow-xs"
                 : "text-base-content/80 hover:bg-base-200 hover:text-base-content"
             }`}
           >
@@ -99,7 +113,7 @@ function Navbar() {
               to="/orders"
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive("/orders")
-                  ? "bg-primary text-primary-content"
+                  ? "bg-primary text-primary-content shadow-xs"
                   : "text-base-content/80 hover:bg-base-200 hover:text-base-content"
               }`}
             >
@@ -113,7 +127,7 @@ function Navbar() {
               to="/admin"
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
                 location.pathname.startsWith("/admin")
-                  ? "bg-neutral text-neutral-content"
+                  ? "bg-primary/20 text-primary border border-primary/30"
                   : "text-primary hover:bg-primary/10"
               }`}
             >
@@ -123,21 +137,24 @@ function Navbar() {
           )}
         </nav>
 
-        {/* Right Side: Cart & User Auth Controls */}
+        {/* Right Side: Theme Toggle, Cart & User Auth Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Cart Icon - only displayed if user is logged in */}
-          {isAuthenticated && (
-            <Link
-              to="/cart"
-              className="btn btn-ghost btn-circle btn-sm relative text-base-content hover:bg-base-200"
-              title="Shopping Cart"
-            >
-              <ShoppingCart className="w-5 h-5" />
-              <span className="badge badge-primary badge-xs absolute -top-1 -right-1 font-bold">
-                0
+          {/* Theme Toggle Button */}
+          <ThemeToggle />
+
+          {/* Cart Icon */}
+          <Link
+            to="/cart"
+            className="btn btn-ghost btn-circle btn-sm relative text-base-content hover:bg-base-200"
+            title="Shopping Cart"
+          >
+            <ShoppingCart className="w-5 h-5" />
+            {totalItems > 0 && (
+              <span className="badge badge-primary badge-xs absolute -top-1 -right-1 font-bold animate-pulse text-primary-content">
+                {totalItems}
               </span>
-            </Link>
-          )}
+            )}
+          </Link>
 
           {isAuthenticated ? (
             <div className="dropdown dropdown-end">
@@ -146,11 +163,11 @@ function Navbar() {
                 role="button"
                 className="btn btn-ghost btn-sm flex items-center gap-2 border border-base-300 rounded-lg py-1 px-2.5"
               >
-                <div className="w-7 h-7 rounded-full bg-neutral text-neutral-content flex items-center justify-center text-xs font-bold uppercase">
+                <div className="w-7 h-7 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold uppercase border border-primary/30">
                   {user?.name ? user.name.charAt(0) : "U"}
                 </div>
                 <div className="flex flex-col items-start text-left hidden lg:flex">
-                  <span className="text-xs font-semibold capitalize leading-none">
+                  <span className="text-xs font-semibold capitalize leading-none text-base-content">
                     {user?.name}
                   </span>
                   <span className="text-[10px] text-base-content/60 capitalize mt-0.5">
@@ -160,7 +177,7 @@ function Navbar() {
               </div>
               <ul
                 tabIndex={0}
-                className="dropdown-content menu menu-sm bg-base-100 rounded-box z-50 mt-3 w-56 p-2 shadow-lg border border-base-200"
+                className="dropdown-content menu menu-sm bg-base-100 rounded-box z-50 mt-3 w-56 p-2 shadow-xl border border-base-300 text-base-content"
               >
                 <li className="menu-title px-3 py-1.5 border-b border-base-200 mb-1">
                   <div className="flex flex-col">
@@ -187,7 +204,7 @@ function Navbar() {
                 <li>
                   <Link to="/cart" className="flex items-center gap-2 py-2">
                     <ShoppingCart className="w-4 h-4 text-primary" />
-                    Shopping Cart
+                    Shopping Cart ({totalItems})
                   </Link>
                 </li>
                 {isAdmin && (
@@ -217,14 +234,14 @@ function Navbar() {
             <div className="flex items-center gap-2">
               <Link
                 to="/login"
-                className="btn btn-ghost btn-sm flex items-center gap-1.5 font-medium"
+                className="btn btn-ghost btn-sm flex items-center gap-1.5 font-medium text-base-content"
               >
                 <LogIn className="w-4 h-4" />
                 Login
               </Link>
               <Link
                 to="/register"
-                className="btn btn-primary btn-sm flex items-center gap-1.5 font-medium"
+                className="btn btn-primary btn-sm flex items-center gap-1.5 font-medium shadow-xs"
               >
                 <UserPlus className="w-4 h-4" />
                 Register
@@ -301,7 +318,7 @@ function Navbar() {
                 }`}
               >
                 <ShoppingCart className="w-4 h-4" />
-                Cart (0)
+                Cart ({totalItems})
               </Link>
 
               <Link

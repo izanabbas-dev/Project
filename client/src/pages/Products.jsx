@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import productService from "../services/productService";
+import { useCart } from "../contexts/CartContext";
 import {
   Package,
   ShoppingCart,
   Star,
   Search,
-  Filter,
+  Check,
 } from "lucide-react";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [addedItemIds, setAddedItemIds] = useState({});
+  const { addToCart } = useCart();
 
   const defaultProducts = [
     {
@@ -95,6 +98,14 @@ export default function Products() {
     fetchProducts();
   }, []);
 
+  const handleAddToCart = (item) => {
+    addToCart(item, 1);
+    setAddedItemIds((prev) => ({ ...prev, [item._id]: true }));
+    setTimeout(() => {
+      setAddedItemIds((prev) => ({ ...prev, [item._id]: false }));
+    }, 1200);
+  };
+
   const filteredProducts = products.filter((p) =>
     p.product_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -127,56 +138,74 @@ export default function Products() {
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map((item) => (
-            <div
-              key={item._id}
-              className="card bg-base-100 border border-base-300 shadow-sm rounded-xl overflow-hidden hover:shadow-md transition-shadow group flex flex-col justify-between"
-            >
-              <div>
-                <div className="aspect-square bg-base-200 overflow-hidden relative">
-                  <img
-                    src={
-                      item.product_image ||
-                      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60"
-                    }
-                    alt={item.product_name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <div className="p-4 space-y-2">
-                  <div className="text-[11px] font-semibold text-base-content/50 uppercase tracking-wider">
-                    {typeof item.category === "object"
-                      ? item.category?.category_name || "General"
-                      : item.category || "General"}
-                  </div>
-                  <h3 className="font-bold text-sm text-base-content line-clamp-2 min-h-10 hover:text-primary">
-                    {item.product_name}
-                  </h3>
-                  <div className="flex items-center gap-1 text-warning text-xs">
-                    <Star className="w-3.5 h-3.5 fill-warning" />
-                    <span className="font-bold text-base-content text-xs">
-                      {item.rating || 4.8}
-                    </span>
-                    <span className="text-base-content/50 text-[11px]">
-                      ({item.reviews || 84})
-                    </span>
-                  </div>
-                </div>
-              </div>
+          {filteredProducts.map((item) => {
+            const isAdded = !!addedItemIds[item._id];
 
-              <div className="p-4 pt-0">
-                <div className="flex items-baseline justify-between pt-2 border-t border-base-200 mb-3">
-                  <span className="text-lg font-black text-base-content">
-                    ${Number(item.price).toFixed(2)}
-                  </span>
+            return (
+              <div
+                key={item._id}
+                className="card bg-base-100 border border-base-300 shadow-sm rounded-xl overflow-hidden hover:shadow-md transition-shadow group flex flex-col justify-between"
+              >
+                <div>
+                  <div className="aspect-square bg-base-200 overflow-hidden relative">
+                    <img
+                      src={
+                        item.product_image ||
+                        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60"
+                      }
+                      alt={item.product_name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="p-4 space-y-2">
+                    <div className="text-[11px] font-semibold text-base-content/50 uppercase tracking-wider">
+                      {typeof item.category === "object"
+                        ? item.category?.category_name || "General"
+                        : item.category || "General"}
+                    </div>
+                    <h3 className="font-bold text-sm text-base-content line-clamp-2 min-h-10 hover:text-primary">
+                      {item.product_name}
+                    </h3>
+                    <div className="flex items-center gap-1 text-warning text-xs">
+                      <Star className="w-3.5 h-3.5 fill-warning" />
+                      <span className="font-bold text-base-content text-xs">
+                        {item.rating || 4.8}
+                      </span>
+                      <span className="text-base-content/50 text-[11px]">
+                        ({item.reviews || 84})
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <button className="btn btn-primary btn-sm w-full flex items-center justify-center gap-2">
-                  <ShoppingCart className="w-4 h-4" />
-                  Add to Cart
-                </button>
+
+                <div className="p-4 pt-0">
+                  <div className="flex items-baseline justify-between pt-2 border-t border-base-200 mb-3">
+                    <span className="text-lg font-black text-base-content">
+                      ${Number(item.price).toFixed(2)}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => handleAddToCart(item)}
+                    className={`btn btn-sm w-full flex items-center justify-center gap-2 transition-all ${
+                      isAdded ? "btn-success text-white" : "btn-primary"
+                    }`}
+                  >
+                    {isAdded ? (
+                      <>
+                        <Check className="w-4 h-4" />
+                        Added to Cart!
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="w-4 h-4" />
+                        Add to Cart
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </Layout>

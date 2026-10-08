@@ -15,8 +15,13 @@ const productService = {
     });
     return response.data;
   },
-  updateProduct: async (id, body) => {
-    const response = await axiosInstance.put(`/products/${id}`, body);
+  updateProduct: async (id, data) => {
+    const isFormData = data instanceof FormData;
+    const response = await axiosInstance.put(
+      `/products/${id}`,
+      data,
+      isFormData ? { headers: { "Content-Type": "multipart/form-data" } } : undefined
+    );
     return response.data;
   },
   deleteProduct: async (id) => {

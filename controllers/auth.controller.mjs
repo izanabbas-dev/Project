@@ -71,7 +71,6 @@ const login = asyncHanlder(async(request, response) => {
 
     response.status(200).json({ 
             message: `User login.`, 
-            
             success: true,
             name: user.name, 
             email: user.email,

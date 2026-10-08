@@ -58,12 +58,12 @@ export default function Login() {
   };
 
   return (
-    <>
-      <div className="min-h-[70vh] flex items-center justify-center py-6">
-        <div className="card w-full max-w-md bg-base-100 border border-base-300 shadow-sm rounded-xl">
+    <Layout>
+      <div className="min-h-[70vh] flex items-center justify-center py-6 px-4">
+        <div className="card w-full max-w-md bg-base-100 border border-base-300 shadow-sm rounded-2xl">
           <div className="card-body p-6 sm:p-8">
             <div className="text-center mb-4">
-              <div className="inline-flex p-3 rounded-full bg-primary/10 text-primary mb-3">
+              <div className="inline-flex p-3 rounded-2xl bg-primary/10 text-primary mb-3">
                 <LogIn className="w-6 h-6" />
               </div>
               <h1 className="text-2xl font-bold text-base-content">
@@ -75,7 +75,7 @@ export default function Login() {
             </div>
 
             {errors.form && (
-              <div className="alert alert-error text-sm py-3 px-4 rounded-lg flex items-center gap-2 mb-2">
+              <div className="alert alert-error text-white text-sm py-3 px-4 rounded-xl flex items-center gap-2 mb-2">
                 <AlertCircle className="w-5 h-5 flex-shrink-0" />
                 <span>{errors.form}</span>
               </div>
@@ -98,8 +98,9 @@ export default function Login() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="name@example.com"
-                    className={`input input-bordered w-full pl-9 ${errors.email ? "input-error" : ""
-                      }`}
+                    className={`input input-bordered w-full pl-9 ${
+                      errors.email ? "input-error" : ""
+                    }`}
                   />
                 </div>
                 {errors.email && (
@@ -125,8 +126,9 @@ export default function Login() {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="••••••••"
-                    className={`input input-bordered w-full pl-9 pr-10 ${errors.password ? "input-error" : ""
-                      }`}
+                    className={`input input-bordered w-full pl-9 pr-10 ${
+                      errors.password ? "input-error" : ""
+                    }`}
                   />
                   <button
                     type="button"
@@ -150,7 +152,7 @@ export default function Login() {
 
               <button
                 type="submit"
-                className="btn btn-primary w-full mt-2"
+                className="btn btn-primary w-full mt-2 font-bold shadow-xs"
                 disabled={loading}
               >
                 {loading ? (
@@ -181,6 +183,6 @@ export default function Login() {
           </div>
         </div>
       </div>
-    </>
+    </Layout>
   );
 }

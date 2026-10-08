@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
 import { useAuth } from "../contexts/AuthContext";
+import { useCart } from "../contexts/CartContext";
 import productService from "../services/productService";
 import {
   ShoppingBag,
@@ -12,8 +13,6 @@ import {
   Headphones,
   RotateCcw,
   ArrowRight,
-  Heart,
-  Eye,
   Sparkles,
   Zap,
   Laptop,
@@ -22,15 +21,16 @@ import {
   Watch,
   Home as HomeIconCat,
   Flame,
-  CheckCircle2,
+  Check,
 } from "lucide-react";
 
 export default function Home() {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [addedIds, setAddedIds] = useState({});
 
-  // Sample static category collection for e-commerce browsing
   const featuredCategories = [
     { name: "Electronics", items: "120+ Items", icon: Laptop },
     { name: "Fashion", items: "350+ Items", icon: Shirt },
@@ -40,7 +40,6 @@ export default function Home() {
     { name: "Trending Deals", items: "50+ Items", icon: Flame },
   ];
 
-  // Sample fallback products if database is empty
   const defaultProducts = [
     {
       _id: "prod-1",
@@ -110,6 +109,16 @@ export default function Home() {
     loadProducts();
   }, []);
 
+  const handleAddToCart = (item) => {
+    addToCart(item, 1);
+    setAddedIds((prev) => ({ ...prev, [item._id]: true }));
+    setTimeout(() => {
+      setAddedIds((prev) => ({ ...prev, [item._id]: false }));
+    }, 1200);
+  };
+
+  const dealProduct = products[0] || defaultProducts[0];
+
   return (
     <Layout>
       <div className="space-y-12">
@@ -159,35 +168,49 @@ export default function Home() {
                 </span>
               </div>
               <img
-                src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60"
+                src={
+                  dealProduct.product_image ||
+                  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60"
+                }
                 alt="Deal of Day"
                 className="w-full h-44 object-cover rounded-lg mb-3 bg-base-200"
               />
               <h3 className="font-bold text-sm truncate">
-                Pro Wireless Noise Cancelling Headset
+                {dealProduct.product_name}
               </h3>
               <div className="flex items-center justify-between mt-2">
                 <div className="flex items-baseline gap-2">
                   <span className="text-lg font-extrabold text-primary">
-                    $149.99
+                    ${Number(dealProduct.price).toFixed(2)}
                   </span>
-                  <span className="text-xs text-base-content/50 line-through">
-                    $199.99
-                  </span>
+                  {dealProduct.oldPrice && (
+                    <span className="text-xs text-base-content/50 line-through">
+                      ${Number(dealProduct.oldPrice).toFixed(2)}
+                    </span>
+                  )}
                 </div>
-                <Link
-                  to="/products"
-                  className="btn btn-primary btn-xs flex items-center gap-1"
+                <button
+                  onClick={() => handleAddToCart(dealProduct)}
+                  className={`btn btn-xs flex items-center gap-1 ${
+                    addedIds[dealProduct._id] ? "btn-success text-white" : "btn-primary"
+                  }`}
                 >
-                  <ShoppingCart className="w-3.5 h-3.5" />
-                  Buy Now
-                </Link>
+                  {addedIds[dealProduct._id] ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" /> Added
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="w-3.5 h-3.5" /> Buy Now
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Trust Badges / Services */}
+        {/* Trust Badges */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="p-4 rounded-xl bg-base-100 border border-base-300 shadow-sm flex items-center gap-3.5">
             <div className="p-3 rounded-lg bg-primary/10 text-primary flex-shrink-0">
@@ -294,69 +317,85 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map((item) => (
-              <div
-                key={item._id}
-                className="card bg-base-100 border border-base-300 shadow-sm rounded-xl overflow-hidden hover:shadow-md transition-shadow group flex flex-col justify-between"
-              >
-                <div>
-                  <div className="relative aspect-square bg-base-200 overflow-hidden">
-                    <img
-                      src={
-                        item.product_image ||
-                        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60"
-                      }
-                      alt={item.product_name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    {item.badge && (
-                      <span className="badge badge-primary badge-sm absolute top-3 left-3 font-semibold">
-                        {item.badge}
-                      </span>
-                    )}
-                  </div>
+            {products.map((item) => {
+              const isAdded = !!addedIds[item._id];
 
-                  <div className="p-4 space-y-2">
-                    <div className="text-[11px] font-semibold text-base-content/50 uppercase tracking-wider">
-                      {typeof item.category === "object"
-                        ? item.category?.category_name || "General"
-                        : item.category || "General"}
-                    </div>
-                    <h3 className="font-bold text-sm text-base-content line-clamp-2 min-h-10 hover:text-primary">
-                      {item.product_name}
-                    </h3>
-                    <div className="flex items-center gap-1 text-warning text-xs">
-                      <Star className="w-3.5 h-3.5 fill-warning" />
-                      <span className="font-bold text-base-content text-xs">
-                        {item.rating || 4.8}
-                      </span>
-                      <span className="text-base-content/50 text-[11px]">
-                        ({item.reviews || 84})
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 pt-0">
-                  <div className="flex items-baseline justify-between pt-2 border-t border-base-200 mb-3">
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-lg font-black text-base-content">
-                        ${Number(item.price).toFixed(2)}
-                      </span>
-                      {item.oldPrice && (
-                        <span className="text-xs text-base-content/40 line-through">
-                          ${Number(item.oldPrice).toFixed(2)}
+              return (
+                <div
+                  key={item._id}
+                  className="card bg-base-100 border border-base-300 shadow-sm rounded-xl overflow-hidden hover:shadow-md transition-shadow group flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="relative aspect-square bg-base-200 overflow-hidden">
+                      <img
+                        src={
+                          item.product_image ||
+                          "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60"
+                        }
+                        alt={item.product_name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      {item.badge && (
+                        <span className="badge badge-primary badge-sm absolute top-3 left-3 font-semibold">
+                          {item.badge}
                         </span>
                       )}
                     </div>
+
+                    <div className="p-4 space-y-2">
+                      <div className="text-[11px] font-semibold text-base-content/50 uppercase tracking-wider">
+                        {typeof item.category === "object"
+                          ? item.category?.category_name || "General"
+                          : item.category || "General"}
+                      </div>
+                      <h3 className="font-bold text-sm text-base-content line-clamp-2 min-h-10 hover:text-primary">
+                        {item.product_name}
+                      </h3>
+                      <div className="flex items-center gap-1 text-warning text-xs">
+                        <Star className="w-3.5 h-3.5 fill-warning" />
+                        <span className="font-bold text-base-content text-xs">
+                          {item.rating || 4.8}
+                        </span>
+                        <span className="text-base-content/50 text-[11px]">
+                          ({item.reviews || 84})
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <button className="btn btn-primary btn-sm w-full flex items-center justify-center gap-2">
-                    <ShoppingCart className="w-4 h-4" />
-                    Add to Cart
-                  </button>
+
+                  <div className="p-4 pt-0">
+                    <div className="flex items-baseline justify-between pt-2 border-t border-base-200 mb-3">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-lg font-black text-base-content">
+                          ${Number(item.price).toFixed(2)}
+                        </span>
+                        {item.oldPrice && (
+                          <span className="text-xs text-base-content/40 line-through">
+                            ${Number(item.oldPrice).toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleAddToCart(item)}
+                      className={`btn btn-sm w-full flex items-center justify-center gap-2 transition-all ${
+                        isAdded ? "btn-success text-white" : "btn-primary"
+                      }`}
+                    >
+                      {isAdded ? (
+                        <>
+                          <Check className="w-4 h-4" /> Added to Cart!
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingCart className="w-4 h-4" /> Add to Cart
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 

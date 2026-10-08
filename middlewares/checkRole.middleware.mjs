@@ -1,24 +1,15 @@
-import User from "../models/user.model.mjs"
-
-
-const checkRole = (...role) => {
-    return async(request, response, next) => {
-        const roleExists = await User.findOne({ role: request.user.role })
-
-        if(!roleExists){
-            return response.status(401).json({ message: 'Insufficient Role' })
+const checkRole = (...roles) => {
+    return async (request, response, next) => {
+        if (!request.user) {
+            return response.status(401).json({ message: "Authentication required" });
         }
 
-        const user = await User.findById( roleExists._id )
-
-        if(!role.includes(user.role)){
-            return response.status(401).json({ message: 'Cannot Access with this role' })
+        if (!roles.includes(request.user.role)) {
+            return response.status(403).json({ message: "Forbidden: Insufficient role permissions" });
         }
 
-        next()
-    }
-}
+        next();
+    };
+};
 
-export default checkRole
-
-// authRouter.get('/profile', verifyAuthToken, checkRole("admin", "customer"), profile)
+export default checkRole;

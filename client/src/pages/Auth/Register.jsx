@@ -93,12 +93,12 @@ export default function Register() {
   };
 
   return (
-    <>
-      <div className="min-h-[75vh] flex items-center justify-center py-6">
-        <div className="card w-full max-w-2xl bg-base-100 border border-base-300 shadow-sm rounded-xl">
+    <Layout>
+      <div className="min-h-[75vh] flex items-center justify-center py-6 px-4">
+        <div className="card w-full max-w-2xl bg-base-100 border border-base-300 shadow-sm rounded-2xl">
           <div className="card-body p-6 sm:p-8">
             <div className="text-center mb-4">
-              <div className="inline-flex p-3 rounded-full bg-primary/10 text-primary mb-3">
+              <div className="inline-flex p-3 rounded-2xl bg-primary/10 text-primary mb-3">
                 <UserPlus className="w-6 h-6" />
               </div>
               <h1 className="text-2xl font-bold text-base-content">
@@ -110,14 +110,14 @@ export default function Register() {
             </div>
 
             {errors.form && (
-              <div className="alert alert-error text-sm py-3 px-4 rounded-lg flex items-center gap-2 mb-4">
+              <div className="alert alert-error text-white text-sm py-3 px-4 rounded-xl flex items-center gap-2 mb-4">
                 <AlertCircle className="w-5 h-5 flex-shrink-0" />
                 <span>{errors.form}</span>
               </div>
             )}
 
             {successMessage && (
-              <div className="alert alert-success text-sm py-3 px-4 rounded-lg flex items-center gap-2 mb-4">
+              <div className="alert alert-success text-white text-sm py-3 px-4 rounded-xl flex items-center gap-2 mb-4">
                 <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
                 <span>{successMessage}</span>
               </div>
@@ -142,8 +142,9 @@ export default function Register() {
                       value={formData.name}
                       onChange={handleChange}
                       placeholder="John Doe"
-                      className={`input input-bordered w-full pl-9 ${errors.name ? "input-error" : ""
-                        }`}
+                      className={`input input-bordered w-full pl-9 ${
+                        errors.name ? "input-error" : ""
+                      }`}
                     />
                   </div>
                   {errors.name && (
@@ -170,8 +171,9 @@ export default function Register() {
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="name@example.com"
-                      className={`input input-bordered w-full pl-9 ${errors.email ? "input-error" : ""
-                        }`}
+                      className={`input input-bordered w-full pl-9 ${
+                        errors.email ? "input-error" : ""
+                      }`}
                     />
                   </div>
                   {errors.email && (
@@ -198,8 +200,9 @@ export default function Register() {
                       value={formData.password}
                       onChange={handleChange}
                       placeholder="Minimum 6 characters"
-                      className={`input input-bordered w-full pl-9 pr-10 ${errors.password ? "input-error" : ""
-                        }`}
+                      className={`input input-bordered w-full pl-9 pr-10 ${
+                        errors.password ? "input-error" : ""
+                      }`}
                     />
                     <button
                       type="button"
@@ -238,8 +241,9 @@ export default function Register() {
                       value={formData.address}
                       onChange={handleChange}
                       placeholder="Street 12, Block B, City"
-                      className={`input input-bordered w-full pl-9 ${errors.address ? "input-error" : ""
-                        }`}
+                      className={`input input-bordered w-full pl-9 ${
+                        errors.address ? "input-error" : ""
+                      }`}
                     />
                   </div>
                   {errors.address && (
@@ -266,8 +270,9 @@ export default function Register() {
                       value={formData.workphone_no}
                       onChange={handleChange}
                       placeholder="021-1234567"
-                      className={`input input-bordered w-full pl-9 ${errors.workphone_no ? "input-error" : ""
-                        }`}
+                      className={`input input-bordered w-full pl-9 ${
+                        errors.workphone_no ? "input-error" : ""
+                      }`}
                     />
                   </div>
                   {errors.workphone_no && (
@@ -294,8 +299,9 @@ export default function Register() {
                       value={formData.cellphone_no}
                       onChange={handleChange}
                       placeholder="0300-1234567"
-                      className={`input input-bordered w-full pl-9 ${errors.cellphone_no ? "input-error" : ""
-                        }`}
+                      className={`input input-bordered w-full pl-9 ${
+                        errors.cellphone_no ? "input-error" : ""
+                      }`}
                     />
                   </div>
                   {errors.cellphone_no && (
@@ -321,8 +327,9 @@ export default function Register() {
                       name="dob"
                       value={formData.dob}
                       onChange={handleChange}
-                      className={`input input-bordered w-full pl-9 ${errors.dob ? "input-error" : ""
-                        }`}
+                      className={`input input-bordered w-full pl-9 ${
+                        errors.dob ? "input-error" : ""
+                      }`}
                     />
                   </div>
                   {errors.dob && (
@@ -335,7 +342,7 @@ export default function Register() {
 
               <button
                 type="submit"
-                className="btn btn-primary w-full mt-4"
+                className="btn btn-primary w-full mt-4 font-bold shadow-xs"
                 disabled={loading}
               >
                 {loading ? (
@@ -366,6 +373,6 @@ export default function Register() {
           </div>
         </div>
       </div>
-    </>
+    </Layout>
   );
 }
